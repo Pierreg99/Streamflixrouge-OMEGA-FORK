@@ -178,7 +178,6 @@
     <string name="settings_category_tmdb">TMDb సెట్టింగ్స్</string>
     <string name="settings_tmdb_api_key">కస్టమ్ TMDb API కీ</string>
     <string name="settings_tmdb_api_key_summary">యాప్‌తో అందించిన డిఫాల్ట్ API కీని ఉపయోగించడానికి ఖాళీగా వదలండి</string>
-    <string name="settings_parental_control_title">పేరెంటల్ కంట్రోల్</string>
     <string name="settings_section_content_title">కంటెంట్ మరియు భద్రత</string>
 
     <string name="backup_category_title">బ్యాకప్ మరియు రీస్టోర్</string>
