@@ -3,46 +3,20 @@ name: Build & Release APK
 on:
   push:
     tags:
-      - "v*"
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Release tag to use (e.g. v1.7.230). Defaults to manual-N"
-        required: false
-        default: ""
-
-permissions:
-  contents: write
+      - 'v*'
 
 jobs:
   build-and-release:
     name: Build & Release APK
     runs-on: ubuntu-latest
     steps:
-      - name: Compute release tag
-        run: |
-          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
-            echo "TAG_NAME=$GITHUB_REF_NAME" >> "$GITHUB_ENV"
-          elif [ -n "${{ inputs.version }}" ]; then
-            echo "TAG_NAME=${{ inputs.version }}" >> "$GITHUB_ENV"
-          else
-            echo "TAG_NAME=manual-$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
-          fi
-
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v1
 
       - name: Setup JDK environment
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v1
         with:
-          distribution: temurin
           java-version: 17
-          cache: gradle
-
-      - name: Accept Android SDK licenses
-        run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          yes | sdkmanager "platforms;android-36" "ndk;26.1.10909125" >/dev/null || true
 
       - name: Access Secrets
         env:
@@ -63,78 +37,99 @@ jobs:
               -e "s|{{UPROT_API_KEY}}|$UPROT_API_KEY|g" \
               app/src/main/cpp/native-lib.cpp.template > app/src/main/cpp/native-lib.cpp
 
-      - name: Prepare signing keystore
-        run: |
-          KEYSTORE_FILE="$RUNNER_TEMP/streamflix.keystore"
-          echo "KEYSTORE_FILE=$KEYSTORE_FILE" >> "$GITHUB_ENV"
-          if [ -n "${{ secrets.KEYSTORE }}" ]; then
-            echo "${{ secrets.KEYSTORE }}" | base64 -d > "$KEYSTORE_FILE"
-            echo "KEYSTORE_PASS=${{ secrets.SIGNING_STORE_PASSWORD }}" >> "$GITHUB_ENV"
-            echo "KEY_ALIAS=${{ secrets.SIGNING_KEY_ALIAS }}" >> "$GITHUB_ENV"
-            echo "KEY_PASS=${{ secrets.SIGNING_KEY_PASSWORD }}" >> "$GITHUB_ENV"
-          else
-            keytool -genkeypair -keystore "$KEYSTORE_FILE" \
-              -storepass streamflix-ci -alias streamflix -keypass streamflix-ci \
-              -keyalg RSA -keysize 2048 -validity 10000 \
-              -dname "CN=Streamflix CI, O=Streamflix, C=IN"
-            echo "KEYSTORE_PASS=streamflix-ci" >> "$GITHUB_ENV"
-            echo "KEY_ALIAS=streamflix" >> "$GITHUB_ENV"
-            echo "KEY_PASS=streamflix-ci" >> "$GITHUB_ENV"
-          fi
-
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
-      - name: Build default APK
+      - name: Build APK
         run: ./gradlew assembleRelease --stacktrace
 
-      - name: Sign default APK
-        run: |
-          BT="$ANDROID_HOME/build-tools/34.0.0"
-          "$BT/zipalign" -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
-          "$BT/apksigner" sign --ks "$KEYSTORE_FILE" --ks-pass "pass:$KEYSTORE_PASS" \
-            --ks-key-alias "$KEY_ALIAS" --key-pass "pass:$KEY_PASS" \
-            --out "$RUNNER_TEMP/streamflix-$TAG_NAME.apk" "$RUNNER_TEMP/aligned.apk"
-
-      - name: Build mobile APK
-        run: |
-          echo APP_LAYOUT=mobile >> local.properties
-          ./gradlew assembleRelease --stacktrace
-
-      - name: Sign mobile APK
-        run: |
-          BT="$ANDROID_HOME/build-tools/34.0.0"
-          "$BT/zipalign" -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned-mobile.apk"
-          "$BT/apksigner" sign --ks "$KEYSTORE_FILE" --ks-pass "pass:$KEYSTORE_PASS" \
-            --ks-key-alias "$KEY_ALIAS" --key-pass "pass:$KEY_PASS" \
-            --out "$RUNNER_TEMP/streamflix-$TAG_NAME-only-mobile.apk" "$RUNNER_TEMP/aligned-mobile.apk"
-
-      - name: Build TV APK
-        run: |
-          echo APP_LAYOUT=tv >> local.properties
-          ./gradlew assembleRelease --stacktrace
-
-      - name: Sign TV APK
-        run: |
-          BT="$ANDROID_HOME/build-tools/34.0.0"
-          "$BT/zipalign" -f 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned-tv.apk"
-          "$BT/apksigner" sign --ks "$KEYSTORE_FILE" --ks-pass "pass:$KEYSTORE_PASS" \
-            --ks-key-alias "$KEY_ALIAS" --key-pass "pass:$KEY_PASS" \
-            --out "$RUNNER_TEMP/streamflix-$TAG_NAME-only-tv.apk" "$RUNNER_TEMP/aligned-tv.apk"
+      - name: Sign APK
+        id: sign_apk
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
 
       - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+
+      - name: Upload Release APK
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
+          asset_name: ${{ github.event.repository.name }}-${{ github.ref_name }}.apk
+          asset_content_type: application/zip
+
+
+      - name: Set Mobile version
         run: |
-          ASSETS=(
-            "$RUNNER_TEMP/streamflix-$TAG_NAME.apk"
-            "$RUNNER_TEMP/streamflix-$TAG_NAME-only-mobile.apk"
-            "$RUNNER_TEMP/streamflix-$TAG_NAME-only-tv.apk"
-          )
-          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
-            gh release upload "$TAG_NAME" "${ASSETS[@]}" --clobber
-          else
-            gh release create "$TAG_NAME" "${ASSETS[@]}" \
-              --title "Streamflix $TAG_NAME" \
-              --notes "Automatic build for $TAG_NAME (commit $GITHUB_SHA)"
-          fi
+          echo APP_LAYOUT=mobile >> local.properties
+
+      - name: Build APK
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Sign APK
+        id: sign_apk_mobile
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Upload Release APK
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.sign_apk_mobile.outputs.signedReleaseFile }}
+          asset_name: ${{ github.event.repository.name }}-${{ github.ref_name }}-only-mobile.apk
+          asset_content_type: application/zip
+
+
+      - name: Set TV version
+        run: |
+          echo APP_LAYOUT=tv >> local.properties
+
+      - name: Build APK
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Sign APK
+        id: sign_apk_tv
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Upload Release APK
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.sign_apk_tv.outputs.signedReleaseFile }}
+          asset_name: ${{ github.event.repository.name }}-${{ github.ref_name }}-only-tv.apk
+          asset_content_type: application/zip
