@@ -4,12 +4,16 @@
 
 # Streamflixrouge-OMEGA-FORK
 
-Eigenes Repository. GitHub hat noch keine Beschreibung gesetzt.
-
-[![branch](https://img.shields.io/badge/branch-main-7EB8C9?style=flat-square)](https://github.com/Pierreg99/Streamflixrouge-OMEGA-FORK)
-[![sichtbarkeit](https://img.shields.io/badge/sichtbarkeit-öffentlich-141414?style=flat-square&labelColor=0A0A0A)](https://github.com/Pierreg99/Streamflixrouge-OMEGA-FORK)
-[![sprache](https://img.shields.io/badge/sprache-nicht_gesetzt-2A2A28?style=flat-square&labelColor=0A0A0A)](https://github.com/Pierreg99/Streamflixrouge-OMEGA-FORK)
-
+<p><strong>Streamflix (Reborn): Android-Streaming-App in Kotlin, Community-Fortführung.</strong></p>
+<p>
+<img alt="Kotlin: 99%" src="https://img.shields.io/badge/Kotlin-99%25-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white">
+<img alt="Lizenz: Apache-2.0" src="https://img.shields.io/badge/Lizenz-Apache--2.0-2E7D32?style=for-the-badge">
+<img alt="Sichtbarkeit: Öffentlich" src="https://img.shields.io/badge/Sichtbarkeit-%C3%96ffentlich-0B7285?style=for-the-badge">
+</p>
+<p>
+<a href="https://github.com/Pierreg99/Streamflixrouge-OMEGA-FORK/actions/workflows/release.yml"><img alt="release.yml" src="https://github.com/Pierreg99/Streamflixrouge-OMEGA-FORK/actions/workflows/release.yml/badge.svg"></a>
+</p>
+<p><a href="#schnellstart">Schnellstart</a> · <a href="#projektstruktur">Projektstruktur</a> · <a href="#english-summary">English</a></p>
 </div>
 
 <table>
@@ -39,28 +43,132 @@ Der Default-Branch `main` ist die Fläche, die zählt. Was nicht in diesem Baum 
 </tr>
 </table>
 
-## Lesen
+---
 
-1. Default-Branch öffnen.
-2. Nur Dateien in diesem Baum als Beleg nehmen.
-3. Issues und Diskussionen nur nutzen, wenn sie im Repo eingeschaltet sind.
+## Inhaltsverzeichnis
 
-## Grenze
+- [Bestand und Fakten](#bestand)
+- [Überblick](#überblick)
+- [Features](#features)
+- [Schnellstart](#schnellstart)
+- [Architektur](#architektur)
+- [Projektstruktur](#projektstruktur)
+- [Dokumentation](#dokumentation)
+- [Projektdetails](#projektdetails)
+- [English summary](#english-summary)
+- [Lizenzhinweis](#lizenzhinweis)
 
-Keine Qualitätszahl, kein Paketstand und keine Runtime, die nicht als Datei in diesem Repo steht.
+## Überblick
 
-<p align="center"><sub>Fläche nach Cryo Core Lite v1.5 · Tokens #0A0A0A / #141414 / #7EB8C9</sub></p>
+Streamflix (Reborn): Android-Streaming-App in Kotlin, Community-Fortführung.
 
+| Merkmal | Wert |
+| --- | --- |
+| Sprachen | Kotlin (99%) |
+| Dateien im Repository | 674 |
+| CI-Workflows | 1 |
+| Lizenz | [LICENSE](LICENSE) |
 
-<details>
-<summary>Bisheriger README-Text</summary>
+## Features
+
+- Automatisierung über GitHub Actions: `release.yml`
+- 3 Testdateien im Repository
+- Android-Build mit Gradle
+
+## Schnellstart
+
+```bash
+git clone https://github.com/Pierreg99/Streamflixrouge-OMEGA-FORK.git
+cd Streamflixrouge-OMEGA-FORK
+```
+
+**Android**
+
+```bash
+./gradlew assembleDebug
+```
+
+## Architektur
+
+Übersicht der wichtigsten Verzeichnisse nach Anzahl der enthaltenen Dateien.
+
+```mermaid
+flowchart LR
+    R(["Streamflixrouge-OMEGA-FORK"])
+    R --> D0["app/<br/>622 Dateien"]
+    R --> D1["navigation/<br/>18 Dateien"]
+    R --> D2["retrofit-jsoup-converter/<br/>9 Dateien"]
+    R --> D3["supabase/<br/>3 Dateien"]
+    R --> D4["gradle/<br/>2 Dateien"]
+    R --> D5["moviblast-plugin/<br/>2 Dateien"]
+    R --> D6["assets/<br/>1 Datei"]
+    CI[["GitHub Actions<br/>1 Workflows"]] -.-> R
+```
+
+## Projektstruktur
+
+```text
+Streamflixrouge-OMEGA-FORK/
+├── .github/  (5 Dateien)
+│   ├── docs/
+│   ├── ISSUE_TEMPLATE/
+│   └── workflows/
+├── app/  (622 Dateien)
+│   ├── src/
+│   ├── .gitignore
+│   ├── build.gradle
+│   └── proguard-rules.pro
+├── assets/  (1 Datei)
+│   └── readme-banner.svg
+├── gradle/  (2 Dateien)
+│   └── wrapper/
+├── moviblast-plugin/  (2 Dateien)
+│   ├── plugin.js
+│   └── test_provider.py
+├── navigation/  (18 Dateien)
+│   ├── src/
+│   ├── .gitignore
+│   ├── build.gradle
+│   ├── consumer-rules.pro
+│   └── proguard-rules.pro
+├── retrofit-jsoup-converter/  (9 Dateien)
+│   ├── src/
+│   ├── .gitignore
+│   ├── build.gradle
+│   ├── consumer-rules.pro
+│   └── proguard-rules.pro
+├── supabase/  (3 Dateien)
+│   ├── migrations/
+│   └── README.md
+├── .gitignore
+├── build.gradle
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── LICENSE
+├── lint.xml
+├── README.md
+├── settings.gradle
+├── streamflix-main.zip
+├── supabase_installation.md
+└── SUPABASE_PROFILE_MERGE_GUIDE.md
+```
+
+## Dokumentation
+
+- [supabase_installation.md](supabase_installation.md)
+- [SUPABASE_PROFILE_MERGE_GUIDE.md](SUPABASE_PROFILE_MERGE_GUIDE.md)
+
+## Projektdetails
+
+Der folgende Abschnitt übernimmt die bisherige Projektdokumentation.
 
 <h1 align="center">Streamflix Reborn</h1>
 
 <p align="center">
   <img src="./app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" height="100px" />
   <br />
-  <strong>🔄 Reborn Version</strong> - Community continuation of the original Streamflix project
+  <strong> Reborn Version</strong> - Community continuation of the original Streamflix project
   <br />
   An open-source Android TV and mobile app for educational streaming interface, made with Android Studio, in Kotlin
   <br />
@@ -99,7 +207,7 @@ Keine Qualitätszahl, kein Paketstand und keine Runtime, die nicht als Datei in 
 
 **Streamflix Reborn** is an independent continuation of the original Streamflix project created by [Lory-Stan TANASI](https://github.com/stantanasi). This reborn version maintains the same educational purpose and functionality while ensuring continued development and support.
 
-### 🔄 What is Streamflix Reborn?
+### What is Streamflix Reborn?
 
 - **Independent Continuation**: This is an independent continuation of the original Streamflix project
 - **Same Vision**: Maintains the original educational and open-source philosophy
@@ -133,7 +241,6 @@ The interface aggregates content from multiple sources and provides a convenient
 - Coroutines
 - MVVM Architecture
 - Android Architecture Components
-
 
 ## Getting started
 
@@ -214,4 +321,12 @@ This project is licensed under the `Apache-2.0` License - see the [LICENSE](LICE
   © 2025 Streamflix Reborn. Built with respect for the original work.
 </p>
 
-</details>
+## English summary
+
+Streamflix (Reborn): Kotlin Android streaming app, community continuation.
+
+Clone the repository and follow the commands in [Schnellstart](#schnellstart); the [project layout](#projektstruktur) shows where the code lives. Further documents are listed under [Dokumentation](#dokumentation).
+
+## Lizenzhinweis
+
+Siehe [LICENSE](LICENSE).
