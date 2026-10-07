@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./assets/readme-banner.svg" alt="Streamflixrouge-OMEGA-FORK" width="100%">
+
 # Streamflixrouge-OMEGA-FORK
 
 <p><strong>Streamflix (Reborn): Android-Streaming-App in Kotlin, Community-Fortführung.</strong></p>
@@ -14,10 +16,38 @@
 <p><a href="#schnellstart">Schnellstart</a> · <a href="#projektstruktur">Projektstruktur</a> · <a href="#english-summary">English</a></p>
 </div>
 
+<table>
+<tr>
+<td width="58%" valign="top">
+
+### Bestand
+
+Keine Beschreibung im Repo-Metadatum. Dieses README erfindet deshalb keine Funktionen, Releases oder Laufzeiten.
+
+Der Default-Branch `main` ist die Fläche, die zählt. Was nicht in diesem Baum liegt, ist kein Feature dieses Repos.
+
+</td>
+<td width="42%" valign="top">
+
+### Fakten
+
+| Feld | Wert |
+| --- | --- |
+| Owner | Pierreg99 |
+| Branch | `main` |
+| Sichtbarkeit | öffentlich |
+| Sprache | nicht gesetzt |
+| Archiv | nein |
+
+</td>
+</tr>
+</table>
+
 ---
 
 ## Inhaltsverzeichnis
 
+- [Bestand und Fakten](#bestand)
 - [Überblick](#überblick)
 - [Features](#features)
 - [Schnellstart](#schnellstart)
@@ -35,7 +65,7 @@ Streamflix (Reborn): Android-Streaming-App in Kotlin, Community-Fortführung.
 | Merkmal | Wert |
 | --- | --- |
 | Sprachen | Kotlin (99%) |
-| Dateien im Repository | 673 |
+| Dateien im Repository | 674 |
 | CI-Workflows | 1 |
 | Lizenz | [LICENSE](LICENSE) |
 
@@ -71,6 +101,7 @@ flowchart LR
     R --> D3["supabase/<br/>3 Dateien"]
     R --> D4["gradle/<br/>2 Dateien"]
     R --> D5["moviblast-plugin/<br/>2 Dateien"]
+    R --> D6["assets/<br/>1 Datei"]
     CI[["GitHub Actions<br/>1 Workflows"]] -.-> R
 ```
 
@@ -87,6 +118,8 @@ Streamflixrouge-OMEGA-FORK/
 │   ├── .gitignore
 │   ├── build.gradle
 │   └── proguard-rules.pro
+├── assets/  (1 Datei)
+│   └── readme-banner.svg
 ├── gradle/  (2 Dateien)
 │   └── wrapper/
 ├── moviblast-plugin/  (2 Dateien)
